@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghép Hán tự - Pinyin</title>
+<style>
+body { font-family: Arial; text-align: center; background: #f4f4f4; margin:0; }
+h1 { margin-top:20px; }
+.card {
+  display: inline-block;
+  margin: 10px;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+  min-width: 100px;
+  font-size: 22px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.correct { background: #90ee90; opacity:0.4; pointer-events:none; }
+.wrong { background: #ff7f7f; }
+.picked { background:#add8e6; }
+a { display:block; margin-top:20px; }
+</style>
+</head>
+<body>
+
+<h1>Ghép Hán Tự - Pinyin</h1>
+<div>Đúng: <span id="score">0</span></div>
+<div id="game"></div>
+<button onclick="init()">Chơi lại</button>
+<a href="index.html">← Quay về menu</a>
+
+<script>
+const data = [
+  {hanzi: "你", pinyin: "nǐ"},
+  {hanzi: "好", pinyin: "hǎo"},
+  {hanzi: "学", pinyin: "xué"},
+  {hanzi: "生", pinyin: "shēng"}
+];
+
+let selected = [];
+let matched = 0;
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function init() {
+  matched = 0;
+  selected = [];
+  document.getElementById("score").innerText = matched;
+  const game = document.getElementById("game");
+  game.innerHTML = "";
+
+  let hanziCards = data.map(item => ({value:item.hanzi, pair:item.pinyin}));
+  let pinyinCards = data.map(item => ({value:item.pinyin, pair:item.hanzi}));
+
+  let cards = shuffle([...hanziCards, ...pinyinCards]);
+
+  cards.forEach(card => {
+    let div = document.createElement("div");
+    div.className = "card";
+    div.innerText = card.value;
+    div.onclick = () => selectCard(div, card);
+    game.appendChild(div);
+  });
+}
+
+function selectCard(element, card) {
+  if (selected.length < 2 && !element.classList.contains("correct")) {
+    selected.push({element, card});
+    element.classList.add("picked");
+  }
+
+  if (selected.length === 2) {
+    setTimeout(checkMatch, 400);
+  }
+}
+
+function checkMatch() {
+  let [first, second] = selected;
+
+  if (first.card.pair === second.card.value || second.card.pair === first.card.value) {
+    first.element.classList.remove("picked");
+    second.element.classList.remove("picked");
+    first.element.classList.add("correct");
+    second.element.classList.add("correct");
+    matched++;
+    document.getElementById("score").innerText = matched;
+  } else {
+    first.element.classList.add("wrong");
+    second.element.classList.add("wrong");
+    setTimeout(()=>{
+      first.element.classList.remove("picked","wrong");
+      second.element.classList.remove("picked","wrong");
+    },300);
+  }
+
+  selected = [];
+}
+
+init();
+</script>
+
+</body>
+</html>
