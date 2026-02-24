@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trắc nghiệm Pinyin</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;text-align:center}
+    header{background:#fff;padding:18px 12px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+    .wrap{max-width:720px;margin:18px auto;padding:0 12px}
+    .box{background:#fff;border-radius:14px;padding:16px;box-shadow:0 6px 14px rgba(0,0,0,.10)}
+    .hanzi{font-size:64px;margin:10px 0}
+    .btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    button{padding:12px;border:0;border-radius:12px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.08);font-size:16px}
+    .ok{background:#baf3ba}
+    .bad{background:#ffb7b7}
+    a{display:inline-block;margin-top:14px;color:#333}
+  </style>
+</head>
+<body>
+  <header>
+    <h2 style="margin:0">Trắc nghiệm Pinyin</h2>
+    <div style="color:#444;margin-top:8px">Nhìn chữ và chọn pinyin đúng</div>
+  </header>
+
+  <div class="wrap">
+    <div class="box">
+      <div><b>Điểm:</b> <span id="score">0</span></div>
+      <div class="hanzi" id="hanzi">你</div>
+      <div class="btns" id="choices"></div>
+
+      <button style="margin-top:12px" onclick="next()">Câu tiếp theo</button>
+      <div style="margin-top:10px;color:#666;font-size:13px">
+        Gợi ý: Bạn sửa dữ liệu trong biến <b>data</b>.
+      </div>
+    </div>
+
+    <a href="index.html">← Quay về menu</a>
+  </div>
+
+<script>
+  const data = [
+    { hanzi:"你", pinyin:"nǐ" },
+    { hanzi:"好", pinyin:"hǎo" },
+    { hanzi:"学", pinyin:"xué" },
+    { hanzi:"生", pinyin:"shēng" },
+    { hanzi:"我", pinyin:"wǒ" },
+    { hanzi:"是", pinyin:"shì" },
+  ];
+
+  let current = null;
+  let score = 0;
+
+  function randInt(n){ return Math.floor(Math.random()*n); }
+  function sample(arr){ return arr[randInt(arr.length)]; }
+  function shuffle(a){
+    a=[...a];
+    for(let i=a.length-1;i>0;i--){
+      const j=randInt(i+1);
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function renderQuestion(){
+    current = sample(data);
+    document.getElementById("hanzi").innerText = current.hanzi;
+
+    const wrongs = new Set();
+    while(wrongs.size < 3){
+      const p = sample(data).pinyin;
+      if(p !== current.pinyin) wrongs.add(p);
+    }
+    const options = shuffle([current.pinyin, ...wrongs]);
+
+    const box = document.getElementById("choices");
+    box.innerHTML = "";
+    options.forEach(opt=>{
+      const btn = document.createElement("button");
+      btn.innerText = opt;
+      btn.onclick = ()=>check(btn, opt);
+      box.appendChild(btn);
+    });
+  }
+
+  function check(btn, opt){
+    const buttons = [...document.querySelectorAll("#choices button")];
+    buttons.forEach(b=>b.disabled=true);
+
+    if(opt === current.pinyin){
+      btn.classList.add("ok");
+      score += 1;
+      document.getElementById("score").innerText = score;
+    } else {
+      btn.classList.add("bad");
+      buttons.forEach(b=>{
+        if(b.innerText === current.pinyin) b.classList.add("ok");
+      });
+    }
+  }
+
+  function next(){ renderQuestion(); }
+
+  renderQuestion();
+</script>
+</body>
+</html>
