@@ -3,125 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ghép Hán tự - Pinyin</title>
+  <title>Fanlaoshi Mini Game</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; background:#f4f4f4; margin:0; }
-    header { padding: 18px 12px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,.06); position: sticky; top:0; }
-    h1 { margin: 0; font-size: 22px; }
-    p { margin: 8px 0 0; color:#444; }
-    .wrap { max-width: 920px; margin: 14px auto 40px; padding: 0 12px; }
-    .bar { display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; margin: 12px 0; }
-    button { padding: 10px 14px; border:0; border-radius: 10px; cursor:pointer; box-shadow: 0 4px 10px rgba(0,0,0,.08); }
-    .score { background:#fff; padding:10px 14px; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,.06); }
-    #game { display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 14px; }
-    .card {
-      background: white; border-radius: 14px; padding: 18px 12px;
-      cursor: pointer; user-select:none;
-      font-size: 22px; box-shadow: 0 6px 14px rgba(0,0,0,0.10);
-      transition: transform .06s ease, opacity .2s ease;
-      min-height: 62px; display:flex; align-items:center; justify-content:center;
+    body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0}
+    header{background:#fff;padding:18px 12px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+    h1{margin:0;font-size:22px}
+    .wrap{max-width:900px;margin:18px auto;padding:0 12px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    a.card{
+      display:block;text-decoration:none;color:#111;background:#fff;border-radius:14px;
+      padding:16px;box-shadow:0 6px 14px rgba(0,0,0,.10)
     }
-    .picked { background: #cfe8ff; }
-    .correct { background:#baf3ba; opacity: .25; pointer-events:none; }
-    .wrong { background:#ffb7b7; }
+    a.card:hover{filter:brightness(.98)}
+    .title{font-size:18px;font-weight:700;margin:0 0 6px}
+    .desc{margin:0;color:#444;line-height:1.4}
   </style>
 </head>
 <body>
   <header>
-    <h1>Ghép Hán tự - Pinyin</h1>
-    <p>Chọn 1 chữ và 1 pinyin đúng với nhau</p>
+    <h1>Fanlaoshi Mini Game</h1>
+    <div style="color:#444;margin-top:8px">Chọn trò chơi để luyện Hán tự & Pinyin</div>
   </header>
 
   <div class="wrap">
-    <div class="bar">
-      <div class="score" id="scoreBox">Đúng: 0 / 0</div>
-      <button onclick="restart()">Chơi lại</button>
+    <div class="grid">
+      <a class="card" href="match.html">
+        <p class="title">1) Ghép Hán tự – Pinyin</p>
+        <p class="desc">Chọn 1 chữ và 1 pinyin đúng với nhau.</p>
+      </a>
+
+      <a class="card" href="quiz.html">
+        <p class="title">2) Trắc nghiệm Pinyin</p>
+        <p class="desc">Nhìn chữ và chọn pinyin đúng.</p>
+      </a>
+
+      <a class="card" href="typing.html">
+        <p class="title">3) Gõ Pinyin</p>
+        <p class="desc">Nhìn chữ và gõ pinyin.</p>
+      </a>
     </div>
-    <div id="game"></div>
   </div>
-
-<script>
-  const data = [
-    { hanzi: "你", pinyin: "nǐ" },
-    { hanzi: "好", pinyin: "hǎo" },
-    { hanzi: "学", pinyin: "xué" },
-    { hanzi: "生", pinyin: "shēng" },
-  ];
-
-  let selected = [];
-  let matched = 0;
-
-  function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
-
-  function setScore() {
-    document.getElementById("scoreBox").innerText = `Đúng: ${matched} / ${data.length}`;
-  }
-
-  function init() {
-    matched = 0;
-    selected = [];
-    setScore();
-
-    const game = document.getElementById("game");
-    game.innerHTML = "";
-
-    const hanziCards = data.map(x => ({ type: "hanzi", value: x.hanzi, pair: x.pinyin }));
-    const pinyinCards = data.map(x => ({ type: "pinyin", value: x.pinyin, pair: x.hanzi }));
-
-    const cards = shuffle([...hanziCards, ...pinyinCards]);
-
-    cards.forEach(card => {
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerText = card.value;
-      div.addEventListener("click", () => pick(div, card));
-      game.appendChild(div);
-    });
-  }
-
-  function pick(el, card) {
-    if (el.classList.contains("correct")) return;
-    if (selected.length === 2) return;
-    if (selected.some(x => x.el === el)) return;
-
-    el.classList.add("picked");
-    selected.push({ el, card });
-
-    if (selected.length === 2) setTimeout(check, 450);
-  }
-
-  function check() {
-    const [a, b] = selected;
-    const isMatch = (a.card.pair === b.card.value) || (b.card.pair === a.card.value);
-
-    if (isMatch) {
-      a.el.classList.remove("picked");
-      b.el.classList.remove("picked");
-      a.el.classList.add("correct");
-      b.el.classList.add("correct");
-      matched += 1;
-      setScore();
-      if (matched === data.length) setTimeout(() => alert("Hoàn thành! 🎉"), 200);
-    } else {
-      a.el.classList.add("wrong");
-      b.el.classList.add("wrong");
-      setTimeout(() => {
-        a.el.classList.remove("picked", "wrong");
-        b.el.classList.remove("picked", "wrong");
-      }, 350);
-    }
-    selected = [];
-  }
-
-  function restart() { init(); }
-  init();
-</script>
 </body>
 </html>
