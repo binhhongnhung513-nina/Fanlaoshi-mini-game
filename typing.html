@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gõ Pinyin</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;text-align:center}
+    header{background:#fff;padding:18px 12px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+    .wrap{max-width:720px;margin:18px auto;padding:0 12px}
+    .box{background:#fff;border-radius:14px;padding:16px;box-shadow:0 6px 14px rgba(0,0,0,.10)}
+    .hanzi{font-size:72px;margin:12px 0}
+    input{width:min(360px,90%);padding:12px;border-radius:12px;border:1px solid #ddd;font-size:18px}
+    button{padding:12px 14px;border:0;border-radius:12px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-left:8px}
+    .msg{margin-top:10px;font-weight:700}
+    .ok{color:#118a11}
+    .bad{color:#c00000}
+    a{display:inline-block;margin-top:14px;color:#333}
+    .hint{color:#666;font-size:13px;margin-top:10px;line-height:1.4}
+  </style>
+</head>
+<body>
+  <header>
+    <h2 style="margin:0">Gõ Pinyin</h2>
+    <div style="color:#444;margin-top:8px">Nhìn chữ và gõ pinyin</div>
+  </header>
+
+  <div class="wrap">
+    <div class="box">
+      <div><b>Điểm:</b> <span id="score">0</span></div>
+      <div class="hanzi" id="hanzi">你</div>
+
+      <div style="margin:10px 0">
+        <input id="inp" placeholder="Nhập pinyin..." autocomplete="off" />
+        <button onclick="submit()">OK</button>
+      </div>
+
+      <div class="msg" id="msg"></div>
+
+      <button style="margin-top:12px" onclick="next()">Chữ tiếp theo</button>
+
+      <div class="hint">
+        ✅ Chấp nhận cả <b>nǐ</b> và <b>ni</b> (không dấu).
+        Tip: Bạn sửa dữ liệu trong biến <b>data</b>.
+      </div>
+    </div>
+
+    <a href="index.html">← Quay về menu</a>
+  </div>
+
+<script>
+  const data = [
+    { hanzi:"你", pinyin:"nǐ" },
+    { hanzi:"好", pinyin:"hǎo" },
+    { hanzi:"学", pinyin:"xué" },
+    { hanzi:"生", pinyin:"shēng" },
+    { hanzi:"我", pinyin:"wǒ" },
+    { hanzi:"是", pinyin:"shì" },
+  ];
+
+  let cur = null;
+  let score = 0;
+
+  function randInt(n){ return Math.floor(Math.random()*n); }
+  function sample(arr){ return arr[randInt(arr.length)]; }
+
+  // Bỏ dấu để so sánh: nǐ -> ni, hǎo -> hao
+  function stripTone(s){
+    const map = {
+      'ā':'a','á':'a','ǎ':'a','à':'a',
+      'ē':'e','é':'e','ě':'e','è':'e',
+      'ī':'i','í':'i','ǐ':'i','ì':'i',
+      'ō':'o','ó':'o','ǒ':'o','ò':'o',
+      'ū':'u','ú':'u','ǔ':'u','ù':'u',
+      'ǖ':'ü','ǘ':'ü','ǚ':'ü','ǜ':'ü',
+      'ń':'n','ň':'n','ǹ':'n',
+      'ḿ':'m'
+    };
+    return s.trim().toLowerCase().split('').map(ch=>map[ch]||ch).join('');
+  }
+
+  function render(){
+    cur = sample(data);
+    document.getElementById("hanzi").innerText = cur.hanzi;
+    document.getElementById("msg").innerText = "";
+    document.getElementById("inp").value = "";
+    document.getElementById("inp").focus();
+  }
+
+  function submit(){
+    const user = document.getElementById("inp").value;
+   const ok = stripTone(user) === stripTone(cur.pinyin);
+
+    const msg = document.getElementById("msg");
+    if(ok){
+      score += 1;
+      document.getElementById("score").innerText = score;
+      msg.className = "msg ok";
+      msg.innerText = "Đúng ✅";
+    } else {
+      msg.className = "msg bad";
+      msg.innerText = `Sai ❌ Đáp án: ${cur.pinyin}`;
+    }
+  }
+
+  function next(){ render(); }
+
+  document.getElementById("inp").addEventListener("keydown", (e)=>{
+    if(e.key==="Enter") submit();
+  });
+
+  render();
+</script>
+</body>
+</html>
